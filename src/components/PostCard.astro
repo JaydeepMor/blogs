@@ -1,0 +1,23 @@
+---
+import type { PostData } from '../lib/schema';
+import { categoryBySlug } from '../lib/categories';
+import { formatDate, withBase } from '../lib/posts';
+interface Props { post: PostData }
+const { post } = Astro.props;
+const base = import.meta.env.BASE_URL;
+const category = categoryBySlug(post.category);
+const glyph = post.cover.kind === 'glyph' ? post.cover.value : category.glyph;
+---
+<a class={`card cat-${category.slug}`} href={withBase(`posts/${post.slug}/`, base)}>
+  <div class="cover">
+    {post.cover.kind === 'image'
+      ? <img src={withBase(post.cover.value, base)} alt="" loading="lazy">
+      : <svg aria-hidden="true"><use href={`#g-${glyph}`}></use></svg>}
+  </div>
+  <div class="card-body">
+    <span><span class="chip">{category.label}</span></span>
+    <h3>{post.title}</h3>
+    <p>{post.summary}</p>
+    <span class="meta">{formatDate(post.publishedAt)} · {post.readMinutes} min read</span>
+  </div>
+</a>

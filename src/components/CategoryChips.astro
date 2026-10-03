@@ -1,0 +1,13 @@
+---
+import { CATEGORIES } from '../lib/categories';
+import { withBase } from '../lib/posts';
+interface Props { current?: string }
+const { current = 'all' } = Astro.props;
+const base = import.meta.env.BASE_URL;
+---
+<div class="chip-row">
+  <a class="chip" href={withBase('', base)} aria-current={current === 'all' ? 'page' : undefined}>All topics</a>
+  {CATEGORIES.map((c) => (
+    <a class={`chip cat-${c.slug}`} href={withBase(`category/${c.slug}/`, base)} aria-current={current === c.slug ? 'page' : undefined}>{c.label}</a>
+  ))}
+</div>

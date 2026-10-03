@@ -1,0 +1,14 @@
+---
+import { withBase } from '../lib/posts';
+const base = import.meta.env.BASE_URL;
+---
+<footer class="site-footer">
+  <div class="wrap">
+    <span>© {new Date().getFullYear()} Jaydeep Mor</span>
+    <nav aria-label="Footer">
+      <a href={withBase('rss.xml', base)}>RSS</a>
+      <a href="https://www.linkedin.com/in/jaydeep-mor">LinkedIn</a>
+      <a href="https://github.com/JaydeepMor">GitHub</a>
+    </nav>
+  </div>
+</footer>

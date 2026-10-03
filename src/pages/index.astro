@@ -1,0 +1,26 @@
+---
+import Base from '../layouts/Base.astro';
+import CategoryChips from '../components/CategoryChips.astro';
+import Featured from '../components/Featured.astro';
+import PostCard from '../components/PostCard.astro';
+import { getPosts } from '../lib/content';
+import { splitFeatured } from '../lib/posts';
+
+const { featured, rest } = splitFeatured(await getPosts());
+---
+<Base title="Home" active="blogs">
+  <section class="hero">
+    <h1>Clear, visual notes on backend, cloud, security and AI.</h1>
+    <p>Step-by-step explanations with diagrams, written from nine years of building healthcare, fintech and e-commerce systems.</p>
+    <CategoryChips current="all" />
+  </section>
+
+  {featured ? <Featured post={featured} /> : <p class="empty">No posts yet.</p>}
+
+  {rest.length > 0 && (
+    <>
+      <div class="section-head"><h2>Latest posts</h2></div>
+      <div class="grid">{rest.map((post) => <PostCard post={post} />)}</div>
+    </>
+  )}
+</Base>

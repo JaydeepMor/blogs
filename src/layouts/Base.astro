@@ -1,0 +1,41 @@
+---
+import '../styles/site.css';
+import Glyphs from '../components/Glyphs.astro';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+import { withBase } from '../lib/posts';
+
+interface Props { title: string; description?: string; active?: 'blogs' | 'about' }
+const { title, description = 'Clear, visual notes on backend, cloud, security and AI.', active } = Astro.props;
+const base = import.meta.env.BASE_URL;
+const siteName = 'Jaydeep Mor · Engineering Notes';
+const fullTitle = title === 'Home' ? siteName : `${title} · Jaydeep Mor`;
+---
+<!doctype html>
+<html lang="en" data-base={withBase('', base)}>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{fullTitle}</title>
+<meta name="description" content={description}>
+<link rel="icon" type="image/svg+xml" href={withBase('favicon.svg', base)}>
+<link rel="alternate" type="application/rss+xml" title={siteName} href={withBase('rss.xml', base)}>
+<script is:inline>
+(function () {
+  var root = document.documentElement, saved = null;
+  try { saved = localStorage.getItem('theme'); } catch (e) {}
+  var dark = saved ? saved === 'dark' : window.matchMedia('(prefers-color-scheme: dark)').matches;
+  root.setAttribute('data-theme', dark ? 'dark' : 'light');
+})();
+</script>
+</head>
+<body>
+<Glyphs />
+<Header active={active} />
+<main class="wrap"><slot /></main>
+<Footer />
+<script>
+  import '../scripts/theme';
+</script>
+</body>
+</html>
