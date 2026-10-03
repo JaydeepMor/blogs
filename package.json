@@ -1,0 +1,27 @@
+{
+  "name": "blogs",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=22.12.0"
+  },
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro build && pagefind --site dist",
+    "preview": "astro preview",
+    "test": "vitest run",
+    "check:dist": "node scripts/check-dist.mjs dist",
+    "test:empty": "POSTS_DIR=./tests/fixtures/empty-posts astro build --outDir dist-empty && node scripts/check-dist.mjs dist-empty --expect-empty",
+    "seed": "node scripts/seed-samples.mjs"
+  },
+  "dependencies": {
+    "@astrojs/rss": "^4.0.19",
+    "@astrojs/sitemap": "^3.7.4",
+    "astro": "^7.3.5",
+    "mermaid": "^12.1.0"
+  },
+  "devDependencies": {
+    "pagefind": "^1.5.2",
+    "vitest": "^5.0.3"
+  }
+}
