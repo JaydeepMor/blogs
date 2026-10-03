@@ -17,7 +17,7 @@ export const postSchema = z.object({
   ]),
   html: z.string(),
   sources: z
-    .array(z.object({ title: z.string().min(1), url: z.string().url(), kind: z.enum(['official', 'secondary']) }))
+    .array(z.object({ title: z.string().min(1), url: z.string().url().regex(/^https?:\/\//, 'Source links must use http or https'), kind: z.enum(['official', 'secondary']) }))
     .default([]),
   disclaimer: z.boolean().default(false),
 });

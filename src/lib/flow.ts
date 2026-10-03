@@ -6,6 +6,11 @@ export interface FlowSpec { width: number; height: number; label?: string; nodes
 const DEFAULT_W = 110;
 const DEFAULT_H = 56;
 const MAX_NODES = 40;
+const COLORS = ['a', 'b', 'c'];
+
+// Every value that reaches an SVG attribute is checked here, so the renderer never interpolates untrusted strings.
+const isNum = (v: unknown): v is number => typeof v === 'number' && Number.isFinite(v);
+const isPos = (v: unknown): v is number => isNum(v) && v > 0;
 
 function fail(message: string): never {
   throw new Error(`Invalid diagram: ${message}`);
@@ -25,7 +30,8 @@ export function parseFlow(json: string): FlowSpec {
   const ids = new Set<string>();
   for (const n of nodes) {
     if (typeof n.id !== 'string' || typeof n.label !== 'string') fail('every node needs an id and a label');
-    if (typeof n.x !== 'number' || typeof n.y !== 'number') fail(`node "${n.id}" needs numeric x and y`);
+    if (!isNum(n.x) || !isNum(n.y)) fail(`node "${n.id}" needs numeric x and y`);
+    if ((n.w !== undefined && !isPos(n.w)) || (n.h !== undefined && !isPos(n.h))) fail(`node "${n.id}" has a non-numeric size`);
     ids.add(n.id);
   }
   const known = (id: string) => {
@@ -40,10 +46,15 @@ export function parseFlow(json: string): FlowSpec {
   for (const f of flows) {
     if (!Array.isArray(f.path) || f.path.length < 2) fail('a flow needs at least two nodes');
     f.path.forEach(known);
+    if (f.color !== undefined && !COLORS.includes(f.color)) fail('flow colour must be a, b or c');
+    if (f.dur !== undefined && !isPos(f.dur)) fail('flow duration must be a positive number');
+  }
+  if ((raw.width !== undefined && !isPos(raw.width)) || (raw.height !== undefined && !isPos(raw.height))) {
+    fail('width and height must be positive numbers');
   }
   return {
-    width: typeof raw.width === 'number' ? raw.width : 760,
-    height: typeof raw.height === 'number' ? raw.height : 300,
+    width: raw.width ?? 760,
+    height: raw.height ?? 300,
     label: typeof raw.label === 'string' ? raw.label : undefined,
     nodes, edges, flows,
   };
@@ -96,7 +107,8 @@ export function renderFlow(spec: FlowSpec): string {
 
   spec.flows.forEach((f, i) => {
     const dur = f.dur ?? 3;
-    const begin = Math.round(((dur * i) / spec.flows.length) * 100) / 100;
+    // A negative begin starts each dot part-way along its path, so no dot waits at the SVG origin.
+    const begin = -Math.round(((dur * i) / spec.flows.length) * 100) / 100 || 0;
     let path = '';
     for (let s = 0; s < f.path.length - 1; s++) {
       const h = hop(byId.get(f.path[s])!, byId.get(f.path[s + 1])!);

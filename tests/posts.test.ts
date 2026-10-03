@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { extractToc, formatDate, sortNewestFirst, splitFeatured, withBase } from '../src/lib/posts';
+import { assetUrl, extractToc, formatDate, sortNewestFirst, splitFeatured, withBase } from '../src/lib/posts';
 import type { PostData } from '../src/lib/schema';
 
 const post = (slug: string, date: string): PostData => ({
@@ -57,5 +57,15 @@ describe('extractToc', () => {
   });
   it('decodes the common entities in heading text', () => {
     expect(extractToc('<h2 id="a">JWT &amp; cookies</h2>')).toEqual([{ id: 'a', text: 'JWT & cookies' }]);
+  });
+});
+
+describe('assetUrl', () => {
+  it('prefixes a site-relative path with the base', () => {
+    expect(assetUrl('media/a/cover.png', '/blogs/')).toBe('/blogs/media/a/cover.png');
+  });
+  it('leaves a path that already starts with the base unchanged', () => {
+    expect(assetUrl('/blogs/media/a/cover.png', '/blogs/')).toBe('/blogs/media/a/cover.png');
+    expect(assetUrl('/blogs/media/a/cover.png', '/blogs')).toBe('/blogs/media/a/cover.png');
   });
 });

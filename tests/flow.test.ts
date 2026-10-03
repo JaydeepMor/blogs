@@ -31,6 +31,17 @@ describe('parseFlow', () => {
   it('rejects a node without numeric position', () => {
     expect(() => parseFlow(JSON.stringify({ ...spec, nodes: [{ id: 'a', label: 'A' }] }))).toThrow(/^Invalid diagram: node "a" needs numeric x and y/);
   });
+  it('rejects a flow colour other than a, b or c', () => {
+    expect(() => parseFlow(JSON.stringify({ ...spec, flows: [{ path: ['a', 'b'], color: 'a" onclick="x' }] }))).toThrow(/^Invalid diagram: flow colour must be a, b or c/);
+  });
+  it('rejects a non-numeric or non-positive flow duration', () => {
+    expect(() => parseFlow(JSON.stringify({ ...spec, flows: [{ path: ['a', 'b'], dur: '3" onbegin="x' }] }))).toThrow(/^Invalid diagram: flow duration must be a positive number/);
+    expect(() => parseFlow(JSON.stringify({ ...spec, flows: [{ path: ['a', 'b'], dur: 0 }] }))).toThrow(/^Invalid diagram: flow duration must be a positive number/);
+  });
+  it('rejects non-numeric node size and diagram size', () => {
+    expect(() => parseFlow(JSON.stringify({ ...spec, nodes: [{ id: 'a', label: 'A', x: 0, y: 0, w: '9" onclick="x' }], edges: [], flows: [] }))).toThrow(/^Invalid diagram: node "a" has a non-numeric size/);
+    expect(() => parseFlow(JSON.stringify({ ...spec, width: '1" onload="x' }))).toThrow(/^Invalid diagram: width and height must be positive numbers/);
+  });
   it('rejects more than 40 nodes', () => {
     const nodes = Array.from({ length: 41 }, (_, i) => ({ id: `n${i}`, label: 'N', x: i, y: 0 }));
     expect(() => parseFlow(JSON.stringify({ ...spec, nodes, edges: [], flows: [] }))).toThrow(/^Invalid diagram: too many nodes/);
@@ -53,7 +64,7 @@ describe('renderFlow', () => {
     expect(svg).toContain('class="dg-dot dg-dot-a"');
     expect(svg).toContain('class="dg-dot dg-dot-b"');
     expect(svg).toContain('dur="3s" begin="0s"');
-    expect(svg).toContain('dur="4s" begin="2s"');
+    expect(svg).toContain('dur="4s" begin="-2s"');
   });
   it('uses the label for accessibility and the given size', () => {
     expect(svg).toContain('viewBox="0 0 400 200"');

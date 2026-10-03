@@ -111,10 +111,10 @@ figcaption { font-size: 14px; color: var(--muted); margin-top: 10px; text-align:
   .article-layout { grid-template-columns: 1fr; }
   .toc { display: none; }
   .stats { grid-template-columns: repeat(2, 1fr); }
-  .search { width: 44px; padding: 0; justify-content: center; }
-  .search input { display: none; }
+  .search { width: 160px; padding: 0 12px; }
 }
 @media (max-width: 600px) {
+  .search { width: 120px; }
   .wrap { padding: 0 16px; }
   .grid { grid-template-columns: 1fr; }
   .nav a { padding: 8px 10px; font-size: 14px; }

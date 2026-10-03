@@ -39,6 +39,11 @@ describe('postSchema', () => {
     expect(() => postSchema.parse({ ...valid, sources: [{ title: 'x', url: 'not a url', kind: 'official' }] })).toThrow();
   });
 
+  it('accepts only http and https source links', () => {
+    expect(() => postSchema.parse({ ...valid, sources: [{ title: 'x', url: 'javascript:alert(1)', kind: 'official' }] })).toThrow();
+    expect(postSchema.parse({ ...valid, sources: [{ title: 'x', url: 'https://example.com/a', kind: 'official' }] }).sources).toHaveLength(1);
+  });
+
   it('rejects zero or fractional read minutes', () => {
     expect(() => postSchema.parse({ ...valid, readMinutes: 0 })).toThrow();
     expect(() => postSchema.parse({ ...valid, readMinutes: 2.5 })).toThrow();

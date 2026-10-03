@@ -21,6 +21,12 @@ export function withBase(path: string, base: string): string {
   return `${base.replace(/\/+$/, '')}/${path.replace(/^\/+/, '')}`;
 }
 
+/** URL of a media file. Accepts a site-relative path ("media/x/a.png") or one that already carries the base. */
+export function assetUrl(value: string, base: string): string {
+  const prefix = `${base.replace(/\/+$/, '')}/`;
+  return value.startsWith(prefix) ? value : withBase(value, base);
+}
+
 const ENTITIES: Record<string, string> = { '&amp;': '&', '&lt;': '<', '&gt;': '>', '&quot;': '"', '&#39;': "'" };
 
 /** Table of contents: every <h2> that carries an id. */
