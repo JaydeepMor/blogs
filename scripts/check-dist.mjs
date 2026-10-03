@@ -1,6 +1,7 @@
 // Checks a built site: required pages exist and every internal URL stays under /blogs/ and resolves.
 import { existsSync, readdirSync, readFileSync, statSync } from 'node:fs';
 import { join } from 'node:path';
+import { gunzipSync } from 'node:zlib';
 
 const [dir, flag] = process.argv.slice(2);
 const expectEmpty = flag === '--expect-empty';
@@ -38,6 +39,16 @@ for (const page of pages) {
     const target = join(dir, rel);
     const ok = rel === '' || (existsSync(target) && (statSync(target).isFile() || existsSync(join(target, 'index.html'))));
     if (!ok) errors.push(`${page}: broken link "${url}"`);
+  }
+}
+
+// Search results link to the URLs stored in the Pagefind index, so they must carry the base path too.
+const fragments = join(dir, 'pagefind', 'fragment');
+if (existsSync(fragments)) {
+  for (const file of readdirSync(fragments)) {
+    const text = gunzipSync(readFileSync(join(fragments, file))).toString('utf8');
+    const url = JSON.parse(text.slice(text.indexOf('{'))).url;
+    if (!url.startsWith(BASE)) errors.push(`search index: result URL outside ${BASE}: "${url}"`);
   }
 }
 
