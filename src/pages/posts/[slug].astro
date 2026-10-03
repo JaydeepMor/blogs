@@ -1,0 +1,60 @@
+---
+import Base from '../../layouts/Base.astro';
+import { categoryBySlug } from '../../lib/categories';
+import { getPosts } from '../../lib/content';
+import { extractToc, formatDate, withBase } from '../../lib/posts';
+import type { PostData } from '../../lib/schema';
+
+export async function getStaticPaths() {
+  const posts = await getPosts();
+  return posts.map((post) => ({ params: { slug: post.slug }, props: { post } }));
+}
+
+interface Props { post: PostData }
+const { post } = Astro.props;
+const base = import.meta.env.BASE_URL;
+const category = categoryBySlug(post.category);
+const toc = extractToc(post.html);
+const pageUrl = new URL(withBase(`posts/${post.slug}/`, base), Astro.site).href;
+const shareUrl = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(pageUrl)}`;
+const meta = [formatDate(post.publishedAt), `${post.readMinutes} min read`, ...(post.tags.length ? [post.tags.join(', ')] : [])].join(' · ');
+---
+<Base title={post.title} description={post.summary} active="blogs">
+  <div class="article-head">
+    <a class={`chip cat-${category.slug}`} href={withBase(`category/${category.slug}/`, base)}>{category.label}</a>
+    <h1 data-pagefind-meta="title">{post.title}</h1>
+    <p class="lead">{post.summary}</p>
+    <div class="byline">
+      <span class="avatar">JM</span>
+      <span><strong>Jaydeep Mor</strong>{meta}</span>
+    </div>
+  </div>
+
+  <div class="article-layout">
+    <article class="prose" data-pagefind-body>
+      <Fragment set:html={post.html} />
+      {post.sources.length > 0 && (
+        <>
+          <h2 id="sources">Sources</h2>
+          <ol class="sources">
+            {post.sources.map((source) => (
+              <li><a href={source.url} rel="noopener">{source.title}</a> · {source.kind === 'official' ? 'official' : 'secondary'}</li>
+            ))}
+          </ol>
+        </>
+      )}
+      {post.disclaimer && <p class="disclaimer">This post is general information for engineers. It is not legal advice.</p>}
+    </article>
+
+    <aside class="toc" aria-label="On this page">
+      <h4>On this page</h4>
+      {toc.map((item) => <a href={`#${item.id}`}>{item.text}</a>)}
+      {post.sources.length > 0 && <a href="#sources">Sources</a>}
+      <div class="share"><a class="btn btn-sm" href={shareUrl} rel="noopener">Share on LinkedIn</a></div>
+    </aside>
+  </div>
+</Base>
+
+<script>
+  import '../../scripts/blocks';
+</script>
