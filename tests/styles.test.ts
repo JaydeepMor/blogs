@@ -24,5 +24,15 @@ describe('site.css', () => {
   it('wraps long inline code inside paragraphs instead of widening the page', () => {
     expect(css).toMatch(/\.prose :not\(pre\) > code\s*\{[^}]*overflow-wrap:\s*anywhere/);
   });
+
+  it('styles tables in posts and lets wide ones scroll inside the article', () => {
+    expect(css).toMatch(/\.prose table\s*\{/);
+    expect(css).toMatch(/\.prose \.table-wrap\s*\{[^}]*overflow-x:\s*auto/);
+  });
+
+  it('does not load fonts through a render-blocking CSS @import', () => {
+    const base = readFileSync(new URL('../src/styles/base.css', import.meta.url), 'utf8');
+    expect(base).not.toMatch(/@import url\("https:\/\/fonts/);
+  });
 });
 

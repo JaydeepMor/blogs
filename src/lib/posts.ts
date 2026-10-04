@@ -34,6 +34,7 @@ export function extractToc(html: string): { id: string; text: string }[] {
   const toc: { id: string; text: string }[] = [];
   for (const match of html.matchAll(/<h2\b[^>]*\bid="([^"]+)"[^>]*>([\s\S]*?)<\/h2>/g)) {
     const text = match[2]
+      .replace(/<span class="step-no">([^<]*)<\/span>/g, '$1. ')
       .replace(/<\/span>/g, ' ')
       .replace(/<[^>]+>/g, '')
       .replace(/&(amp|lt|gt|quot|#39);/g, (e) => ENTITIES[e])

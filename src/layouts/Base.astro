@@ -41,6 +41,9 @@ const googleVerification = import.meta.env.PUBLIC_GOOGLE_SITE_VERIFICATION;
 <meta name="author" content="Jaydeep Mor">
 {noindex ? <meta name="robots" content="noindex, follow"> : <link rel="canonical" href={canonical}>}
 <meta name="theme-color" content="#0b57d0">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Google+Sans+Flex:wght@400;500;600;700&family=Roboto+Mono:wght@400;500&display=swap">
 {googleVerification && <meta name="google-site-verification" content={googleVerification}>}
 <link rel="icon" type="image/svg+xml" href={withBase('favicon.svg', base)}>
 <link rel="alternate" type="application/rss+xml" title={SITE_NAME} href={withBase('rss.xml', base)}>
@@ -75,9 +78,10 @@ const googleVerification = import.meta.env.PUBLIC_GOOGLE_SITE_VERIFICATION;
 </script>
 </head>
 <body>
+<a class="skip-link" href="#main">Skip to content</a>
 <Glyphs />
 <Header active={active} />
-<main class="wrap"><slot /></main>
+<main class="wrap" id="main" tabindex="-1"><slot /></main>
 <Footer />
 <script>
   import '../scripts/theme';

@@ -17,7 +17,9 @@ for (const file of walk(DIST)) {
   if (/(^|\/)google[0-9a-f]+\.html$/.test(file)) continue; // search engine ownership file, not a page
   const rel = relative(DIST, file).split(sep).join('/').replace(/(^|\/)index\.html$/, '$1');
   // Site-relative URL: Pagefind's browser code adds the folder it was loaded from (/blogs/) itself.
-  const result = await index.addHTMLFile({ url: '/' + rel, content: readFileSync(file, 'utf8') });
+  const content = readFileSync(file, 'utf8');
+  if (!content.includes('data-pagefind-body')) continue; // only posts are searchable, even on an empty site
+  const result = await index.addHTMLFile({ url: '/' + rel, content });
   if (result.errors.length) throw new Error(`pagefind: ${file}: ${result.errors.join('; ')}`);
   added++;
 }

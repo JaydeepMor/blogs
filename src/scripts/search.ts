@@ -1,4 +1,7 @@
+import { latestOnly } from '../lib/latest';
+
 const input = document.querySelector<HTMLInputElement>('#search-input');
+const requests = latestOnly();
 const panel = document.querySelector<HTMLElement>('#search-results');
 const base = document.documentElement.dataset.base ?? '/';
 
@@ -22,9 +25,16 @@ async function load(): Promise<Pagefind | null> {
 }
 
 function show(nodes: Node[]) {
-  if (!panel) return;
+  if (!panel || !input) return;
   panel.replaceChildren(...nodes);
   panel.hidden = false;
+  input.setAttribute('aria-expanded', 'true');
+}
+
+function hide() {
+  if (!panel || !input) return;
+  panel.hidden = true;
+  input.setAttribute('aria-expanded', 'false');
 }
 
 function message(text: string): Node[] {
@@ -36,18 +46,22 @@ function message(text: string): Node[] {
 async function search() {
   if (!input || !panel) return;
   const query = input.value.trim();
+  const token = requests.next();
   if (!query) {
-    panel.hidden = true;
+    requests.cancel();
+    hide();
     return;
   }
   const engine = await load();
+  if (!requests.isCurrent(token)) return;
   if (!engine) {
     show(message('Search is available on the published site.'));
     return;
   }
   const response = await engine.debouncedSearch(query, {}, 200);
-  if (response === null) return; // a newer keystroke replaced this search
+  if (response === null || !requests.isCurrent(token)) return; // a newer keystroke replaced this search
   const items = await Promise.all(response.results.slice(0, 6).map((r) => r.data()));
+  if (!requests.isCurrent(token)) return;
   if (items.length === 0) {
     show(message('No posts match.'));
     return;
@@ -72,10 +86,11 @@ if (input && panel) {
   input.addEventListener('keydown', (event) => {
     if (event.key === 'Escape') {
       input.value = '';
-      panel.hidden = true;
+      requests.cancel();
+      hide();
     }
   });
   document.addEventListener('click', (event) => {
-    if (!(event.target as Element).closest('.search-wrap')) panel.hidden = true;
+    if (!(event.target as Element).closest('.search-wrap')) hide();
   });
 }

@@ -2,10 +2,11 @@
 import { existsSync, readdirSync, readFileSync, statSync } from 'node:fs';
 import { join } from 'node:path';
 import { gunzipSync } from 'node:zlib';
+import { BASE as SITE_BASE, SITE } from '../site.config.mjs';
 
 const [dir, flag] = process.argv.slice(2);
 const expectEmpty = flag === '--expect-empty';
-const BASE = '/blogs/';
+const BASE = `${SITE_BASE}/`;
 const errors = [];
 
 if (!dir || !existsSync(dir)) {
@@ -46,7 +47,7 @@ for (const page of pages) {
 
 // SEO: every indexable page has one self-referencing canonical URL, a description, social preview tags
 // and valid structured data. The not-found page must not be indexed.
-const SITE_ROOT = 'https://jaydeepmor.github.io/blogs/';
+const SITE_ROOT = `${SITE}${BASE}`;
 const attr = (html, re) => (html.match(re) ?? [])[1];
 for (const page of pages) {
   const html = readFileSync(page, 'utf8');
@@ -80,6 +81,29 @@ for (const page of pages) {
   }
   if (rel.startsWith('posts/') && !blocks.some((b) => b.includes('"BlogPosting"'))) errors.push(`${rel}: post page has no BlogPosting data`);
 }
+// Accessibility and search hygiene on every page.
+for (const page of pages) {
+  const html = readFileSync(page, 'utf8');
+  const rel = page.slice(dir.length + 1);
+  if (!/<a class="skip-link" href="#main"/.test(html) || !/<main[^>]*id="main"/.test(html)) errors.push(`${rel}: missing skip link to #main`);
+  if (/id="search-results"/.test(html) && !/id="search-results"[^>]*aria-live="polite"/.test(html)) errors.push(`${rel}: search results are not announced (aria-live)`);
+  if (/id="search-input"/.test(html) && !/id="search-input"[^>]*aria-controls="search-results"/.test(html)) errors.push(`${rel}: search input lacks aria-controls`);
+  if (/@import url\("https:\/\/fonts/.test(html)) errors.push(`${rel}: fonts loaded through a blocking @import`);
+  for (const m of html.matchAll(/<pre class="mermaid"([^>]*)>/g)) if (!m[1].includes('data-pagefind-ignore')) errors.push(`${rel}: Mermaid source would be indexed by search`);
+}
+for (const css of walk(dir).filter((f) => f.endsWith('.css'))) {
+  if (/@import url\("https:\/\/fonts/.test(readFileSync(css, 'utf8'))) errors.push(`${css.slice(dir.length + 1)}: fonts loaded through a blocking @import`);
+}
+// Only posts belong in the search index (an empty site must not index About or the 404 page).
+const fragDir = join(dir, 'pagefind', 'fragment');
+if (existsSync(fragDir)) {
+  for (const file of readdirSync(fragDir)) {
+    const text = gunzipSync(readFileSync(join(fragDir, file))).toString('utf8');
+    const url = JSON.parse(text.slice(text.indexOf('{'))).url;
+    if (!/^\/posts\//.test(url)) errors.push(`search index: non-post page indexed: ${url}`);
+  }
+}
+
 if (existsSync(join(dir, 'rss.xml'))) {
   const channel = readFileSync(join(dir, 'rss.xml'), 'utf8').match(/<channel>[\s\S]*?<link>([^<]+)<\/link>/);
   if (!channel || channel[1] !== SITE_ROOT) errors.push(`rss.xml: channel link is ${channel?.[1]}, expected ${SITE_ROOT}`);

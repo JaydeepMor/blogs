@@ -136,6 +136,14 @@ figcaption { font-size: 14px; color: var(--muted); margin-top: 10px; text-align:
 .prose a { overflow-wrap: anywhere; }
 .prose pre.mermaid { font-family: var(--font); }
 .prose :not(pre) > code { overflow-wrap: anywhere; }
+.skip-link { position: absolute; left: 16px; top: -48px; z-index: 50; background: var(--accent); color: var(--on-accent); padding: 8px 16px; border-radius: 999px; font-weight: 500; }
+.skip-link:focus { top: 8px; text-decoration: none; }
+main:focus { outline: none; }
+.prose .table-wrap { overflow-x: auto; border: 1px solid var(--line); border-radius: 16px; }
+.prose table { width: 100%; border-collapse: collapse; font-size: 16px; }
+.prose th, .prose td { text-align: left; padding: 10px 14px; border-top: 1px solid var(--line); vertical-align: top; }
+.prose thead th { border-top: 0; background: var(--surface); font-weight: 500; }
+.prose td p, .prose th p { margin: 0; }
 .cover img { width: 100%; height: 100%; object-fit: cover; border-radius: var(--radius); }
 .featured-art .flow { width: 100%; }
 .featured-art > svg { width: 40%; color: var(--accent); }

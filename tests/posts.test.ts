@@ -48,7 +48,7 @@ describe('extractToc', () => {
   it('collects h2 headings that have an id and strips inner tags', () => {
     const html = '<h2 id="s1"><span class="step-no">1</span>Create a schema</h2><p>x</p><h2>No id</h2><h2 id="sources">Sources</h2>';
     expect(extractToc(html)).toEqual([
-      { id: 's1', text: '1 Create a schema' },
+      { id: 's1', text: '1. Create a schema' },
       { id: 'sources', text: 'Sources' },
     ]);
   });
