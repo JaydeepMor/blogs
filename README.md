@@ -20,3 +20,16 @@ Source of https://jaydeepmor.github.io/blogs/, a static site built with Astro.
 | `npm run test:empty` | Build with zero posts and check the empty state |
 
 Every push to `main` runs the tests and deploys to GitHub Pages.
+
+## SEO
+
+Every page has a canonical URL, a description, Open Graph and Twitter tags for link previews, and
+JSON-LD structured data (BlogPosting and breadcrumbs on posts, WebSite and Person on the home page).
+The not-found page is `noindex`. The sitemap is at `/blogs/sitemap-index.xml` and the build check
+(`npm run check:dist`) fails if any of this goes missing.
+
+To verify the site in Google Search Console, add a URL-prefix property for
+`https://jaydeepmor.github.io/blogs/`, choose the HTML tag method, and save the token as a GitHub
+Actions variable named `PUBLIC_GOOGLE_SITE_VERIFICATION`; then submit the sitemap URL there.
+GitHub Pages serves `robots.txt` only from the domain root, so this repo does not ship one.
+

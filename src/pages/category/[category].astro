@@ -4,6 +4,7 @@ import CategoryChips from '../../components/CategoryChips.astro';
 import PostCard from '../../components/PostCard.astro';
 import { CATEGORIES, categoryBySlug } from '../../lib/categories';
 import { getPosts } from '../../lib/content';
+import { breadcrumbLd } from '../../lib/seo';
 
 export function getStaticPaths() {
   return CATEGORIES.map((c) => ({ params: { category: c.slug } }));
@@ -11,8 +12,9 @@ export function getStaticPaths() {
 
 const category = categoryBySlug(Astro.params.category!);
 const posts = (await getPosts()).filter((post) => post.category === category.slug);
+const crumbs = breadcrumbLd([{ name: 'Blogs', path: '' }, { name: category.label, path: `category/${category.slug}/` }], Astro.site!.href, import.meta.env.BASE_URL);
 ---
-<Base title={category.label} description={`Posts about ${category.label}.`} active="blogs">
+<Base title={`${category.label} articles`} description={`Step-by-step ${category.label} articles with diagrams and code by Jaydeep Mor, senior backend developer.`} active="blogs" jsonLd={[crumbs]}>
   <section class="hero" style="padding-bottom:24px">
     <h1>{category.label}</h1>
     <CategoryChips current={category.slug} />

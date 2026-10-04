@@ -4,6 +4,7 @@ import { categoryBySlug } from '../../lib/categories';
 import { getPosts } from '../../lib/content';
 import { extractToc, formatDate, withBase } from '../../lib/posts';
 import type { PostData } from '../../lib/schema';
+import { blogPostingLd, breadcrumbLd, postImage } from '../../lib/seo';
 
 export async function getStaticPaths() {
   const posts = await getPosts();
@@ -17,9 +18,16 @@ const category = categoryBySlug(post.category);
 const toc = extractToc(post.html);
 const pageUrl = new URL(withBase(`posts/${post.slug}/`, base), Astro.site).href;
 const shareUrl = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(pageUrl)}`;
+const site = Astro.site!.href;
+const jsonLd = [
+  blogPostingLd(post, { site, base, categoryLabel: category.label }),
+  breadcrumbLd([{ name: 'Blogs', path: '' }, { name: category.label, path: `category/${category.slug}/` }, { name: post.title, path: `posts/${post.slug}/` }], site, base),
+];
+const article = { publishedTime: post.publishedAt.toISOString(), modifiedTime: post.updatedAt.toISOString(), section: category.label, tags: post.tags };
 const meta = [formatDate(post.publishedAt), `${post.readMinutes} min read`, ...(post.tags.length ? [post.tags.join(', ')] : [])].join(' · ');
 ---
-<Base title={post.title} description={post.summary} active="blogs">
+<Base title={post.title} description={post.summary} active="blogs" article={article} jsonLd={jsonLd}
+  image={post.cover.kind === 'image' ? postImage(post, site, base) : undefined} imageAlt={post.title}>
   <div class="article-head">
     <a class={`chip cat-${category.slug}`} href={withBase(`category/${category.slug}/`, base)}>{category.label}</a>
     <h1 data-pagefind-meta="title">{post.title}</h1>
@@ -53,8 +61,7 @@ const meta = [formatDate(post.publishedAt), `${post.readMinutes} min read`, ...(
       <div class="share"><a class="btn btn-sm" href={shareUrl} rel="noopener">Share on LinkedIn</a></div>
     </aside>
   </div>
+  <script>
+    import '../../scripts/blocks';
+  </script>
 </Base>
-
-<script>
-  import '../../scripts/blocks';
-</script>

@@ -4,12 +4,32 @@ import Glyphs from '../components/Glyphs.astro';
 import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
 import { withBase } from '../lib/posts';
+import { absoluteUrl, DEFAULT_IMAGE, jsonLdScript, SITE_NAME } from '../lib/seo';
 
-interface Props { title: string; description?: string; active?: 'blogs' | 'about' }
-const { title, description = 'Clear, visual notes on backend, cloud, security and AI.', active } = Astro.props;
+interface Article { publishedTime: string; modifiedTime: string; section: string; tags: string[] }
+interface Props {
+  title: string;
+  description?: string;
+  active?: 'blogs' | 'about';
+  /** Absolute URL of the share image; defaults to the site image. */
+  image?: string;
+  imageAlt?: string;
+  article?: Article;
+  jsonLd?: unknown[];
+  noindex?: boolean;
+}
+const {
+  title, description = 'Clear, visual notes on backend, cloud, security and AI.', active,
+  image, imageAlt = 'Jaydeep Mor · Engineering Notes', article, jsonLd = [], noindex = false,
+} = Astro.props;
 const base = import.meta.env.BASE_URL;
-const siteName = 'Jaydeep Mor · Engineering Notes';
-const fullTitle = title === 'Home' ? siteName : `${title} · Jaydeep Mor`;
+const site = Astro.site!.href;
+const fullTitle = title === 'Home' ? SITE_NAME : `${title} · Jaydeep Mor`;
+const canonical = new URL(Astro.url.pathname, Astro.site).href;
+const shareImage = image ?? absoluteUrl(DEFAULT_IMAGE, site, base);
+const isDefaultImage = !image;
+// Set PUBLIC_GOOGLE_SITE_VERIFICATION (a GitHub Actions variable) to verify the site in Google Search Console.
+const googleVerification = import.meta.env.PUBLIC_GOOGLE_SITE_VERIFICATION;
 ---
 <!doctype html>
 <html lang="en" data-base={withBase('', base)}>
@@ -18,8 +38,33 @@ const fullTitle = title === 'Home' ? siteName : `${title} · Jaydeep Mor`;
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>{fullTitle}</title>
 <meta name="description" content={description}>
+<meta name="author" content="Jaydeep Mor">
+{noindex ? <meta name="robots" content="noindex, follow"> : <link rel="canonical" href={canonical}>}
+<meta name="theme-color" content="#0b57d0">
+{googleVerification && <meta name="google-site-verification" content={googleVerification}>}
 <link rel="icon" type="image/svg+xml" href={withBase('favicon.svg', base)}>
-<link rel="alternate" type="application/rss+xml" title={siteName} href={withBase('rss.xml', base)}>
+<link rel="alternate" type="application/rss+xml" title={SITE_NAME} href={withBase('rss.xml', base)}>
+<link rel="sitemap" href={withBase('sitemap-index.xml', base)}>
+<meta property="og:site_name" content={SITE_NAME}>
+<meta property="og:locale" content="en_US">
+<meta property="og:type" content={article ? 'article' : 'website'}>
+<meta property="og:title" content={title === 'Home' ? SITE_NAME : title}>
+<meta property="og:description" content={description}>
+<meta property="og:url" content={canonical}>
+<meta property="og:image" content={shareImage}>
+<meta property="og:image:alt" content={imageAlt}>
+{isDefaultImage && <meta property="og:image:width" content="1200">}
+{isDefaultImage && <meta property="og:image:height" content="630">}
+{article && <meta property="article:published_time" content={article.publishedTime}>}
+{article && <meta property="article:modified_time" content={article.modifiedTime}>}
+{article && <meta property="article:author" content={absoluteUrl('about/', site, base)}>}
+{article && <meta property="article:section" content={article.section}>}
+{article?.tags.map((tag) => <meta property="article:tag" content={tag}>)}
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content={title === 'Home' ? SITE_NAME : title}>
+<meta name="twitter:description" content={description}>
+<meta name="twitter:image" content={shareImage}>
+{jsonLd.map((data) => <script type="application/ld+json" set:html={jsonLdScript(data)} />)}
 <script is:inline>
 (function () {
   var root = document.documentElement, saved = null;

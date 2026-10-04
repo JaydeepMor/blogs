@@ -1,9 +1,11 @@
 ---
 import Base from '../layouts/Base.astro';
 import { withBase } from '../lib/posts';
+import { personLd } from '../lib/seo';
 const base = import.meta.env.BASE_URL;
+const profileLd = { '@context': 'https://schema.org', '@type': 'ProfilePage', mainEntity: personLd(Astro.site!.href, base) };
 ---
-<Base title="About" description="Jaydeep Mor is a senior backend developer building healthcare, fintech and e-commerce systems." active="about">
+<Base title="About" description="Jaydeep Mor is a senior backend developer building healthcare, fintech and e-commerce systems." active="about" jsonLd={[profileLd]}>
   <section class="hero" style="padding-bottom:0">
     <span class="chip">Senior Backend Developer · Gujarat, India</span>
     <h1 style="margin-top:20px">I build backend systems that stay fast, secure and audit-ready.</h1>

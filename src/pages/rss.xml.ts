@@ -10,7 +10,7 @@ export async function GET(context: APIContext) {
   return rss({
     title: 'Jaydeep Mor · Engineering Notes',
     description: 'Clear, visual notes on backend, cloud, security and AI.',
-    site: context.site!,
+    site: new URL(base, context.site!).href,
     items: posts.map((post) => ({
       title: post.title,
       description: post.summary,
