@@ -106,9 +106,9 @@ figcaption { font-size: 14px; color: var(--muted); margin-top: 10px; text-align:
 
 @media (max-width: 900px) {
   .grid { grid-template-columns: repeat(2, 1fr); }
-  .featured { grid-template-columns: 1fr; }
+  .featured { grid-template-columns: minmax(0, 1fr); }
   .featured-body { padding: 28px; }
-  .article-layout { grid-template-columns: 1fr; }
+  .article-layout { grid-template-columns: minmax(0, 1fr); }
   .toc { display: none; }
   .stats { grid-template-columns: repeat(2, 1fr); }
   .search { width: 160px; padding: 0 12px; }
@@ -116,16 +116,26 @@ figcaption { font-size: 14px; color: var(--muted); margin-top: 10px; text-align:
 @media (max-width: 600px) {
   .search { width: 120px; }
   .wrap { padding: 0 16px; }
-  .grid { grid-template-columns: 1fr; }
+  .grid { grid-template-columns: minmax(0, 1fr); }
   .nav a { padding: 8px 10px; font-size: 14px; }
   .brand span.name { display: none; }
   .site-header .wrap { gap: 8px; }
   .hero { padding: 48px 0 24px; }
   .prose { font-size: 17px; }
 }
+@media (max-width: 380px) {
+  .site-header .wrap { gap: 4px; }
+  .nav { margin-left: 0; gap: 0; }
+  .nav a { padding: 8px 8px; }
+  .search { width: 96px; }
+}
 @media (prefers-reduced-motion: reduce) { .cover { transition: none; } }
 
 /* Additions for the real site */
+.article-head h1, .card-body h3, .featured-body h3, .prose h2 { overflow-wrap: anywhere; }
+.prose a { overflow-wrap: anywhere; }
+.prose pre.mermaid { font-family: var(--font); }
+.prose :not(pre) > code { overflow-wrap: anywhere; }
 .cover img { width: 100%; height: 100%; object-fit: cover; border-radius: var(--radius); }
 .featured-art .flow { width: 100%; }
 .featured-art > svg { width: 40%; color: var(--accent); }

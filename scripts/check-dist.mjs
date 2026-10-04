@@ -86,13 +86,17 @@ if (existsSync(join(dir, 'rss.xml'))) {
 }
 if (!existsSync(join(dir, 'og-default.png'))) errors.push('missing og-default.png share image');
 
-// Search results link to the URLs stored in the Pagefind index, so they must carry the base path too.
+// Search results link to the URLs stored in the Pagefind index.
 const fragments = join(dir, 'pagefind', 'fragment');
 if (existsSync(fragments)) {
   for (const file of readdirSync(fragments)) {
     const text = gunzipSync(readFileSync(join(fragments, file))).toString('utf8');
+    // Pagefind's browser code prefixes result URLs with the folder it was loaded from (/blogs/),
+    // so the index must store site-relative URLs, and base + URL must be a real page.
     const url = JSON.parse(text.slice(text.indexOf('{'))).url;
-    if (!url.startsWith(BASE)) errors.push(`search index: result URL outside ${BASE}: "${url}"`);
+    if (url.startsWith(BASE)) errors.push(`search index: URL "${url}" already contains ${BASE}; results would link to ${BASE}${url.slice(1)}`);
+    const target = join(dir, url.replace(/^\/+/, ''));
+    if (!existsSync(join(target, 'index.html')) && !existsSync(target)) errors.push(`search index: "${url}" does not resolve to a page`);
   }
 }
 

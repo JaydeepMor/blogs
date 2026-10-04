@@ -18,7 +18,8 @@ async function renderMermaid() {
   for (const node of nodes) node.dataset.src ??= node.textContent ?? '';
   const { default: mermaid } = await import('mermaid');
   const dark = document.documentElement.dataset.theme === 'dark';
-  mermaid.initialize({ startOnLoad: false, theme: dark ? 'dark' : 'neutral', fontFamily: 'inherit', securityLevel: 'strict' });
+  const fontFamily = getComputedStyle(document.body).fontFamily;
+  mermaid.initialize({ startOnLoad: false, theme: dark ? 'dark' : 'neutral', fontFamily, securityLevel: 'strict' });
   for (const node of nodes) {
     node.removeAttribute('data-processed');
     node.classList.remove('mermaid-failed');
