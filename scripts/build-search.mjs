@@ -16,6 +16,7 @@ if (!index) throw new Error(`pagefind: ${errors.join('; ')}`);
 let added = 0;
 for (const file of walk(DIST)) {
   if (!file.endsWith('.html') || file.startsWith(join(DIST, 'pagefind') + sep)) continue;
+  if (/(^|\/)google[0-9a-f]+\.html$/.test(file)) continue; // search engine ownership file, not a page
   const rel = relative(DIST, file).split(sep).join('/').replace(/(^|\/)index\.html$/, '$1');
   const result = await index.addHTMLFile({ url: BASE + rel, content: readFileSync(file, 'utf8') });
   if (result.errors.length) throw new Error(`pagefind: ${file}: ${result.errors.join('; ')}`);

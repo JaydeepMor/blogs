@@ -25,7 +25,9 @@ for (const file of required) {
   if (!existsSync(join(dir, file))) errors.push(`missing page: ${file}`);
 }
 
-const pages = walk(dir).filter((f) => f.endsWith('.html') && !f.includes(`${dir}/pagefind/`));
+// Search engine ownership files (e.g. google<token>.html) are plain text served as-is, not pages.
+const isVerificationFile = (f) => /\/google[0-9a-f]+\.html$/.test(f);
+const pages = walk(dir).filter((f) => f.endsWith('.html') && !f.includes(`${dir}/pagefind/`) && !isVerificationFile(f));
 for (const page of pages) {
   const html = readFileSync(page, 'utf8');
   for (const match of html.matchAll(/\s(?:href|src)="([^"]*)"/g)) {
